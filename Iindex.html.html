@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>تحدي تصنيف العناصر</title>
+<style>
+body{font-family:Tahoma,Arial,sans-serif;background:#f7f5ef;color:#17324d;margin:0}
+main{max-width:1050px;margin:auto;padding:20px}
+h1{text-align:center;font-size:42px;margin:8px}
+p{text-align:center}
+#bank,.zones{display:grid;gap:12px}
+#bank{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin:20px 0}
+.card{border:2px solid #d9dee5;border-radius:16px;padding:12px;text-align:center;cursor:grab;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.card.sel{outline:4px solid #ffd54f;transform:scale(1.02)}
+.card[data-b=s]{background:#dff7f1;border-color:#2a9d8f;color:#155d53}
+.card[data-b=p]{background:#ffe6df;border-color:#e76f51;color:#8c3d28}
+.card[data-b=d]{background:#efe6fb;border-color:#7b61b3;color:#4f3d7f}
+.card[data-b=f]{background:#e4f0ff;border-color:#3d8bd9;color:#1f5d99}
+.sym{font-size:38px;font-weight:bold}.conf{direction:ltr;font-family:monospace;font-weight:bold;margin-top:8px}
+.zones{grid-template-columns:repeat(4,1fr)}
+.zone{min-height:160px;background:#fff;border:3px dashed #9aa4b2;border-radius:18px;padding:12px;text-align:center}
+.zone[data-b=s]{border-color:#2a9d8f;background:#f4fffc}.zone[data-b=p]{border-color:#e76f51;background:#fff8f5}.zone[data-b=d]{border-color:#7b61b3;background:#faf7ff}.zone[data-b=f]{border-color:#3d8bd9;background:#f5faff}
+.zone h2{font-size:32px;margin:4px}.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.chip{border:1px solid #ccd2da;border-radius:999px;padding:6px 10px;background:white;font-weight:bold}
+.chip[data-b=s]{background:#dff7f1;border-color:#2a9d8f;color:#155d53}
+.chip[data-b=p]{background:#ffe6df;border-color:#e76f51;color:#8c3d28}
+.chip[data-b=d]{background:#efe6fb;border-color:#7b61b3;color:#4f3d7f}
+.chip[data-b=f]{background:#e4f0ff;border-color:#3d8bd9;color:#1f5d99}
+#msg{margin:18px 0;padding:12px;border-radius:14px;background:#fff8db;text-align:center;font-weight:bold}
+button{padding:11px 18px;border:0;border-radius:12px;font-weight:bold;background:#17324d;color:white}
+@media(max-width:700px){.zones{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<main>
+<h1>🧪 تحدي تصنيف العناصر</h1>
+<p>اسحبي كل عنصر إلى الفئة الصحيحة وفقًا لنهاية توزيعه الإلكتروني.</p>
+
+<div id="bank">
+  <div class="card" draggable="true" data-i="0" data-b="s"><div class="sym">K</div><div>البوتاسيوم</div><div class="conf">1s² 2s² 2p⁶ 3s² 3p⁶ 4s¹</div></div>
+  <div class="card" draggable="true" data-i="1" data-b="p"><div class="sym">O</div><div>الأكسجين</div><div class="conf">1s² 2s² 2p⁴</div></div>
+  <div class="card" draggable="true" data-i="2" data-b="p"><div class="sym">Cl</div><div>الكلور</div><div class="conf">1s² 2s² 2p⁶ 3s² 3p⁵</div></div>
+  <div class="card" draggable="true" data-i="3" data-b="d"><div class="sym">Fe</div><div>الحديد</div><div class="conf">[Ar] 4s² 3d⁶</div></div>
+  <div class="card" draggable="true" data-i="4" data-b="d"><div class="sym">Zn</div><div>الزنك</div><div class="conf">[Ar] 4s² 3d¹⁰</div></div>
+  <div class="card" draggable="true" data-i="5" data-b="s"><div class="sym">Na</div><div>الصوديوم</div><div class="conf">1s² 2s² 2p⁶ 3s¹</div></div>
+  <div class="card" draggable="true" data-i="6" data-b="s"><div class="sym">Mg</div><div>المغنيسيوم</div><div class="conf">1s² 2s² 2p⁶ 3s²</div></div>
+</div>
+
+<div class="zones">
+ <div class="zone" data-b="s"><h2>فئة s</h2><div class="chips"></div></div>
+ <div class="zone" data-b="p"><h2>فئة p</h2><div class="chips"></div></div>
+ <div class="zone" data-b="d"><h2>فئة d</h2><div class="chips"></div></div>
+ <div class="zone" data-b="f"><h2>فئة f</h2><div class="chips"></div></div>
+</div>
+<div id="msg">على الجوال: اضغطي على العنصر ثم اضغطي على الفئة. وعلى الكمبيوتر يمكنك السحب والإفلات.</div>
+<div style="text-align:center"><button id="reset" type="button">إعادة النشاط</button></div>
+</main>
+<script>
+(()=> {
+const data=[
+ {b:'s',s:'K'},{b:'p',s:'O'},{b:'p',s:'Cl'},{b:'d',s:'Fe'},
+ {b:'d',s:'Zn'},{b:'s',s:'Na'},{b:'s',s:'Mg'}
+];
+let selected=null, done=new Set();
+const msg=document.getElementById('msg');
+function choose(i){
+ selected=Number(i);
+ document.querySelectorAll('.card').forEach(c=>c.classList.toggle('sel',Number(c.dataset.i)===selected));
+ msg.textContent='تم اختيار '+data[selected].s+'؛ الآن اضغطي على الفئة الصحيحة.';
+}
+function place(i,b){
+ i=Number(i); if(done.has(i)) return;
+ if(data[i].b===b){
+   done.add(i);
+   const card=document.querySelector('.card[data-i="'+i+'"]');
+   if(card) card.remove();
+   const chip=document.createElement('span'); chip.className='chip'; chip.dataset.b=b; chip.textContent=data[i].s;
+   document.querySelector('.zone[data-b="'+b+'"] .chips').appendChild(chip);
+   selected=null;
+   msg.textContent=done.size===data.length?'🎉 ممتاز! تم تصنيف جميع العناصر بنجاح.':'✅ إجابة صحيحة.';
+ } else {
+   msg.textContent='❌ حاولي مرة أخرى، ركزي على آخر مستوى ثانوي في التوزيع الإلكتروني.';
+ }
+}
+document.querySelectorAll('.card').forEach(c=>{
+ c.addEventListener('click',()=>choose(c.dataset.i));
+ c.addEventListener('dragstart',e=>e.dataTransfer.setData('text/plain',c.dataset.i));
+});
+document.querySelectorAll('.zone').forEach(z=>{
+ z.addEventListener('click',()=>{if(selected!==null) place(selected,z.dataset.b)});
+ z.addEventListener('dragover',e=>e.preventDefault());
+ z.addEventListener('drop',e=>{e.preventDefault();place(e.dataTransfer.getData('text/plain'),z.dataset.b)});
+});
+document.getElementById('reset').addEventListener('click',()=>location.reload());
+})();
+</script>
+</body>
+</html>
